@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Storm Burst DPS Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .output {
+      margin-top: 2rem;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Storm Burst DPS Calculator</h1>
+
+  <label>
+    Damage per Hit:
+    <input type="number" id="damagePerHit" value="10000" />
+  </label>
+  <label>
+    Channel Duration (s):
+    <input type="number" step="0.1" id="channelDuration" value="1.6" />
+  </label>
+  <label>
+    Orb Duration (s):
+    <input type="number" step="0.1" id="orbDuration" value="1.6" />
+  </label>
+  <label>
+    Casts per Second (e.g., 5 means orb spawns every 0.2s):
+    <input type="number" step="0.1" id="castsPerSecond" value="5" min="0.1" />
+  </label>
+
+  <button onclick="calculateDPS()">Calculate DPS</button>
+
+  <div class="output" id="output"></div>
+
+  <script>
+    function calculateDPS() {
+      const damagePerHit = parseFloat(document.getElementById("damagePerHit").value);
+      const channelDuration = parseFloat(document.getElementById("channelDuration").value);
+      const orbDuration = parseFloat(document.getElementById("orbDuration").value);
+      const castsPerSecond = parseFloat(document.getElementById("castsPerSecond").value);
+
+      // Calculate orb spawn interval from casts per second
+      const orbSpawnInterval = 1 / castsPerSecond;
+      const boltInterval = 0.4;
+
+      const numOrbs = Math.floor(channelDuration / orbSpawnInterval);
+      let totalBoltDamage = 0;
+      let totalExplosionDamage = 0;
+
+      for (let i = 1; i <= numOrbs; i++) {
+        const orbSpawnTime = i * orbSpawnInterval;
+        let remainingDuration = orbDuration - (channelDuration - orbSpawnTime);
+
+        if (remainingDuration < 0) remainingDuration = 0;
+
+        // Round down remainingDuration to nearest 0.4 seconds for damage calc
+        const roundedRemaining = Math.floor(remainingDuration / 0.4) * 0.4;
+
+        // Calculate bolts and explosion multiplier based on roundedRemaining
+        const numBolts = Math.max(0, Math.floor(roundedRemaining / boltInterval));
+        const boltDamage = damagePerHit * numBolts;
+
+        const explosionMultiplier = 1 + 0.75 * Math.floor(roundedRemaining / 0.4);
+        const explosionDamage = damagePerHit * explosionMultiplier;
+
+        totalBoltDamage += boltDamage;
+        totalExplosionDamage += explosionDamage;
+      }
+
+      const totalDamage = totalBoltDamage + totalExplosionDamage;
+      const dps = totalDamage / channelDuration;
+
+      const output = document.getElementById("output");
+      output.innerHTML = `
+        <strong>Results:</strong><br>
+        Orbs Spawned: ${numOrbs}<br>
+        Orb Spawn Interval (based on casts/sec): ${orbSpawnInterval.toFixed(3)} s<br>
+        Total Bolt Damage: ${totalBoltDamage.toLocaleString()}<br>
+        Total Explosion Damage: ${totalExplosionDamage.toLocaleString()}<br>
+        Total Damage: ${totalDamage.toLocaleString()}<br>
+        <strong>Average DPS: ${dps.toFixed(2)}</strong>
+      `;
+    }
+  </script>
+</body>
+</html>
