@@ -100,13 +100,13 @@
       const totalDamage = totalBoltDamage + totalExplosionDamage;
       const dps = totalDamage / channelDuration;
 
-      c    const output = document.getElementById("output");
+      const output = document.getElementById("output");
       output.innerHTML = `
         <strong>Results:</strong><br>
         Orbs Spawned: ${numOrbs}<br>
         Orb Spawn Interval (based on casts/sec): ${orbSpawnInterval.toFixed(3)} s<br>
-        Total Orb Jump Damage: ${totalExplosionDamage.toLocaleString()}<br>
         Total Explosion Damage: ${totalBoltDamage.toLocaleString()}<br>
+        Total Orb Jump Damage: ${totalExplosionDamage.toLocaleString()}<br>
         Total Damage: ${totalDamage.toLocaleString()}<br>
         <strong>Average DPS: ${dps.toFixed(2)}</strong>
       `;
